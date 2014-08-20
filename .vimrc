@@ -1,38 +1,72 @@
 " README {
 " vim: set foldmarker={,} foldlevel=0 spell:
 "
-"	That's my personal .vimrc. As quite a lot of efforts went into this,
-"	I would be glad if this was useful for anybody else than me.
+"	This is my personal vim configuration. As quite a lot of effort went into
+"	this, I would be glad if this was useful for anybody else than me.
 "
-"	And here it is on Github, although there seem to be thousands of
-"	other great .vimrcs there:
+"	Feel free to ask question or reuse any useful parts.
+"
+"	Also published on Github, although there seem to be thousands of other
+"	great .vimrc there:
 "		https://github.com/Flowm/vimrc
 " }
 
 " Basic {
-		"Use Vim defaults
+		"Use vim defaults
 	set nocompatible
-		"Pantogen is used to manage vim plugins
-	call pathogen#infect()
-	call pathogen#helptags()
+		"Disable filetype detection during init
+	filetype off
+		"Enable Syntax highlighting
 	syntax enable
-	filetype plugin indent on
 		"Explicitly define xterm as environment
 	behave xterm
 		"More screen updates
 	set ttyfast
-		"No modeline for security
-	set nomodeline
+		"Enable modelines, secured by ciaranm/securemodelines
+	set modeline
 		"No exec
 	set secure
 		"Encoding
-	"set encoding=utf-8
+	set encoding=utf-8
 		"Function of the backspace key
 	set backspace=indent,eol,start
 " }
 
+" Vundle with automatic setup {
+	let iCanHazVundle=1
+	let vundle_readme=expand('~/.vim/bundle/vundle/README.md')
+	if !filereadable(vundle_readme)
+		echo "Installing Vundle.."
+		echo ""
+		silent !mkdir -p ~/.vim/bundle
+		silent !git clone https://github.com/gmarik/vundle ~/.vim/bundle/vundle
+		let iCanHazVundle=0
+	endif
+	set rtp+=~/.vim/bundle/vundle/
+	call vundle#rc()
+
+	Bundle 'gmarik/vundle'
+
+	Bundle 'airblade/vim-gitgutter'
+	Bundle 'altercation/vim-colors-solarized'
+	Bundle 'bling/vim-airline'
+	Bundle 'jistr/vim-nerdtree-tabs'
+	Bundle 'Lokaltog/vim-easymotion'
+	Bundle 'nathanaelkane/vim-indent-guides'
+	Bundle 'scrooloose/nerdtree'
+	Bundle 'scrooloose/syntastic'
+	Bundle 'ciaranm/securemodelines'
+
+	if iCanHazVundle == 0
+		echo "Installing Bundles, please ignore key map error messages"
+		echo ""
+		:BundleInstall
+	endif
+	filetype plugin indent on
+" }
+
 " General {
-	" Backup and TMP Files {
+	" Backup and temporary files {
 		set backup
 		set backupdir=~/.tmp/.vimbak
 		set directory=~/.tmp/.vimtmp,.
@@ -47,96 +81,58 @@
 	" Searching {
 			"Highlightsearch
 		set hlsearch
-			"Start searching with the first Character
+			"Start searching with the first character
 		set incsearch
-			"Ignore Case
+			"Ignore case
 		set ignorecase
-			"Match Case if searchstring starts with uppercase
+			"Match case if searchstring starts with uppercase
 		set smartcase
 			"Global search by default
 		set gdefault
-			"Treat more Characters as special(like in perl) when searching (e.g. . *)
+			"Treat more characters as special (like in perl) when searching (e.g. . *)
 		set magic
 	" }
 	" Spelling {
-		set spelllang=en_us,de_de
+		set spelllang=en_us ",de_de
 	" }
 	" Misc {
-		" Only one whitespace after _J_oining after a dot
+			" Only one whitespace after _J_oining after a dot
 		set nojoinspaces
+			" Disable autoselection of vim clipboard
+		set clipboard-=autoselect
+		set guioptions-=a
 	" }
 " }
 
 " Appearance and handling {
 	" Theme {
-		"colorscheme evening
+			" Use a portable version of solarized (no terminal adjustments needed)
 		let g:solarized_termcolors=256
+			" Set colorscheme to solarized
 		colorscheme solarized
+			" Use the dark version of solarized
 		set background=dark
+			" Previous used colorscheme
+		"colorscheme evening
 	" }
 	" Colors {
 		hi Search ctermbg=DarkYellow ctermfg=White
-		" Used by listchars
+			" Used by listchars
 		hi SpecialKey ctermbg=1
 
-		" Some tweaks for the solarized colorscheme
+			" Some tweaks for the solarized colorscheme
 		hi Identifier ctermfg=6 cterm=bold
-		" 0 black, 1 darkred, 2 darkgreen, 3 darkyellow, 4 darkblue, 5 darkmagenta, 6 darkcyan, 7 grey
-		" Non-safe Colors, 16-Color-Term:
-		" darkgrey, lightblue, lightgreen, lightcyan, lightred, lightmagenta, " lightyellow, white
-		"
+			" 0 black, 1 darkred, 2 darkgreen, 3 darkyellow, 4 darkblue, 5 darkmagenta, 6 darkcyan, 7 grey
+			" Non-safe Colors, 16-Color-Term:
+			" darkgrey, lightblue, lightgreen, lightcyan, lightred, lightmagenta, " lightyellow, white
 	" }
 	" Statusbar {
-			"Show the Ruler (if statusbar isn't working)
-		"set ruler
 			"Renaming xterm window
 		set title
 			"Don't show line numbers
 		set nonumber
 			"Always show the status bar
 		set laststatus=2
-	" }
-	" Statusline {
-		function RefreshStatusline()
-				"Clear the statusline
-			set statusline=
-				"Tail of the filename
-			set statusline=%t\ 
-				"Complete filename
-			"set statusline=%f\ 
-			if winwidth(0) > 65 
-					"File format
-				set statusline+=[%{&fileformat},
-					"File encoding
-				set statusline+=%{strlen(&fenc)?&fenc:&enc}]
-					"Flag
-				set statusline+=%m%r%h%w
-					"Filetype
-				set statusline+=[%Y]
-					"Filetype
-				set statusline+=[%{&fo}]
-			endif
-			if winwidth(0) > 80
-					"Last modified
-				set statusline+=%20(%{strftime(\"%d/%m/%y\ -\ %H:%M\")}%)
-			endif
-				"Left/Right separator
-			set statusline+=%=
-			if winwidth(0) > 95
-					"Current module name
-				set statusline+=%{synIDattr(synID(line('.'),col('.'),1),'name')}\ 
-			endif
-				"HEX value of char
-			"set statusline+=[HEX:0x%2B]\ 
-				"ASCII value of char
-			"set statusline+=[ASCII:%3b]\ 
-				"COL + LIN
-			set statusline+=%-20([COL:%2v][LIN:%3l/%L]%)\ 
-				"Percentage of file
-			set statusline+=[%3p%%]
-			endfunction
-		call RefreshStatusline()
-		map <silent> <F3> :call RefreshStatusline() <CR>
 	" }
 	" Misc Handling {
 			"Always let 5 lines below and above the cursor on the screen
@@ -164,7 +160,7 @@
 		set fo-=t
 			"Break the line instead of scrolling right
 		set wrap
-			"Don't break lines
+			"Don't stat a new line automatically break lines
 		set wrapmargin=0
 			"But continue with a mark in the next line
 		set showbreak=>>>
@@ -183,21 +179,20 @@
 		set noexpandtab
 	" }
 	" Folding (disabled) {
-			"Currently disable folding
-		set nofoldenable
+			"Disable folding completely
+		"set nofoldenable
+			"Disable folding in the initial view
+		set foldlevel=40
 			"Make folding indent sensitive
-		set foldmethod=manual
+		set foldmethod=indent
 	" }
 " }
 
 " Mappings and functions {
 	" Misc {
 			"Easier escape
-		inoremap <F1> <ESC>
-		nnoremap <F1> <ESC>
-		vnoremap <F1> <ESC>
 		inoremap jj <ESC>
-		inoremap kk <ESC>
+		inoremap ,, <ESC>
 			"Match brackets key
 		nnoremap <tab> %
 		vnoremap <tab> %
@@ -212,8 +207,17 @@
 		nnoremap <leader>v V`]
 			"Split Window and switch over to it
 		nnoremap <leader>w <C-w>v<C-w>l
+		nnoremap <leader>w <C-w>h<C-w>l
 	" }
-	" Disable arrow keys {
+	" C&P between files via a tempfile {
+			"Copy to buffer
+		vnoremap <leader>y :w! ~/.tmp/.vimbak/vimbuffer<CR>
+		nnoremap <leader>y :.w! ~/.tmp/.vimbak/vimbuffer<CR>
+			"Paste from buffer
+		nnoremap <leader>p :r ~/.tmp/.vimbak/vimbuffer<CR>
+		nnoremap <leader>P :-r ~/.tmp/.vimbak/vimbuffer<CR>
+	" }
+	" Disable arrow keys by default {
 		nnoremap <up> <nop>
 		nnoremap <down> <nop>
 		nnoremap <left> <nop>
@@ -222,17 +226,57 @@
 		inoremap <down> <nop>
 		inoremap <left> <nop>
 		inoremap <right> <nop>
-		nnoremap j gj
-		nnoremap k gk
+		"nnoremap j gj
+		"nnoremap k gk
 	" }
-	" Syntax checking {
-		map <leader>spl :w !perl -c %<CR>
-		map <leader>srb :w !ruby -c %<CR>
-		map <leader>sgcc :w !gcc -fsyntax-only %<CR>
-		map <leader>sjava :w !javac %<CR>
+	" Reminders {
+		"+y (copy)
+		"+x (cut)
+		"+p (paste)
 	" }
-	" <F4>-<F8> {
-		" <F4> Toggle visual highlighting of lines longer than 80 chars {
+	" Functions {
+		" Toggle background {
+			function ToggleSolarizedBackground()
+				if &background != 'light'
+					colorscheme solarized
+					set background=light
+				else
+					colorscheme solarized
+					set background=dark
+				endif
+			endfunction
+		" }
+		" Toggle the arrow keys {
+			function ToggleArrowKeys()
+				if !exists('s:arrow_keys')
+					unmap <up>
+					unmap <down>
+					unmap <left>
+					unmap <right>
+					let s:arrow_keys = 1
+				else
+					nnoremap <up> <nop>
+					nnoremap <down> <nop>
+					nnoremap <left> <nop>
+					nnoremap <right> <nop>
+					inoremap <up> <nop>
+					inoremap <down> <nop>
+					inoremap <left> <nop>
+					inoremap <right> <nop>
+					unlet s:arrow_keys
+				endif
+			endfunction
+		" }
+		" Toggle whitespace and tab display {
+			function ToggleList()
+				if &list
+					set nolist
+				else
+					set list
+				endif
+			endfunction
+		" }
+		" Toggle visual highlighting of lines longer than 80 chars {
 			function ToggleColorColumn()
 				if exists('+colorcolumn')
 					if empty(&colorcolumn)
@@ -256,22 +300,8 @@
 					endif
 				endif
 			endfunction
-			map <silent> <F4> :call ToggleColorColumn() <CR>
 		" }
-		" <F5> Toggle paste mode {
-			set pastetoggle=<F5>
-		" }
-		" <F6> Toggle whitespace and tab display {
-			function ToggleList()
-				if &list
-					set nolist
-				else
-					set list
-				endif
-			endfunction
-			map <silent> <F6> :call ToggleList() <CR>
-		" }
-		" <F7> Toggle line numbers {
+		" Toggle line numbers {
 			function ToggleNumber()
 				if &number
 					set nonumber
@@ -279,60 +309,83 @@
 					set number
 				endif
 			endfunction
-			map <silent> <F7> :call ToggleNumber() <CR>
 		" }
-		" <F8> Toggle spell checking {
-			map <F8> :set spell!<CR><Bar>:echo 'Spell check: ' . strpart('OffOn', 3 * &spell, 3)<CR>
+		" Toggle line wrap {
+			function ToggleWrap()
+				if &wrap
+					set nowrap
+				else
+					set wrap
+				endif
+			endfunction
 		" }
 	" }
-	" HTML encode all vowels with Strg-H {
-		function HtmlEscape()
-			silent s/ö/\&ouml;/eg
-			silent s/ä/\&auml;/eg
-			silent s/ü/\&uuml;/eg
-			silent s/Ö/\&Ouml;/eg
-			silent s/Ä/\&Auml;/eg
-			silent s/Ü/\&Uuml;/eg
-			silent s/ß/\&szlig;/eg
-		endfunction
-		map <silent> <c-h> :call HtmlEscape()<CR>
-	" }
-	" Window functions {
+	" Function Keys {
+		" Handling:
+		" <F2> Toggle git diff cloumn
+			map <silent> <F2> :GitGutterToggle <CR>
+		" <L-F2> Toggle git diff line highlighting
+			map <silent> <leader><F2> :GitGutterLineHighlightsToggle <CR>
+		" <F3> Toggle the arrow keys
+			map <silent> <F3> :call ToggleArrowKeys() <CR>
+		" <L-F3> Toggle mouse mode
+			"TODO
+		" <F4> Toggle paste mode
+			set pastetoggle=<F4>
+		" Desing:
+		" <F5> Toggle whitespace and tab display
+			map <silent> <F5> :call ToggleList() <CR>
+		" <L-F5> Toggle visual highlighting of lines longer than 80 chars
+			map <silent> <leader><F5> :call ToggleColorColumn() <CR>
+		" <F6> Toggle line wrap
+			map <silent> <F6> :call ToggleWrap() <CR>
+		" <L-F6> Toggle line numbers
+			map <silent> <leader><F6> :call ToggleNumber() <CR>
+		" <F7> Toggle background
+			map <silent> <F7> :call ToggleSolarizedBackground() <CR>
+		" <F9> Toggle spell checking
+			map <F9> :set spell!<CR><Bar>:echo 'Spell check: ' . strpart('OffOn', 3 * &spell, 3)<CR>
+		" Functions:
+		" <F10> Paste to grave.io
+			map <F10> :w !bury -t % <CR>
+		" <F12> Display all custom keybindings
+			map <F12> :!egrep '" <(L-)?F[1-9][1-2]?> ' ~/.vimrc <CR>
 	" }
 " }
 " Settings for addons {
-	" perl.vim {
-		let g:Perl_GlobalTemplateFile=$HOME.'/.vim/bundle/perl-support.vim/perl-support/templates/Templates'
-		let perl_want_scope_in_variables = 1
-		let perl_extended_vars = 1
-		let perl_string_as_statement = 1
+	" vim-gitgutter {
+		let g:gitgutter_enabled = 0
+		highlight SignColumn ctermfg=239 ctermbg=235 guifg=Yellow
+		highlight GitGutterAdd ctermfg=2 ctermbg=235 guifg=#009900
+		highlight GitGutterChange ctermfg=3 ctermbg=235 guifg=#bbbb00
+		highlight GitGutterDelete ctermfg=1 ctermbg=235 guifg=#ff2222
+		nmap <leader>j <Plug>GitGutterNextHunk
+		nmap <leader>k <Plug>GitGutterPrevHunk
+		" Decrease amount of executions
+		"let g:gitgutter_eager = 0
+	" }
+	" Airline {
+		 let g:airline_theme='solarized'
 	" }
 " }
 
 " Conditionals {
 	if has('autocmd')
-		" Filetype Detection {
+		" Filetype detection {
 			au BufRead,BufNewFile *.gui set ft=perl
 			au BufRead,BufNewFile *.ino,*.pde set ft=arduino
+			au BufRead,BufNewFile Vagrantfile* set ft=ruby
 		" }
 		" Filetype settings {
 			au FileType ruby	set tabstop=2 softtabstop=2 shiftwidth=2 expandtab smarttab
 			au FileType perl	set tabstop=8 softtabstop=4 shiftwidth=4 noexpandtab smarttab shiftround
 			au FileType arduino	set tabstop=2 softtabstop=2 shiftwidth=2 expandtab
 		    au FileType html	set tabstop=4 shiftwidth=4 nosmarttab autoindent
+		    au FileType cpp     set cinoptions=>4,n-2,{2,^-2,:2,=2,g0,h2,p5,t0,+2,(0,u0,w1,m1 shiftwidth=2 tabstop=8 "}
 		" }
 		" Other dev {
 			au BufRead,BufNewFile *.README set textwidth=72
 			au BufRead,BufNewFile *aegis-* set textwidth=72
 		" }
 	endif
-" }
-
-" To be tested/integrated {
-	"set mouse=a
-	"set confirm
-	"au FocusLost * :wa
-	"hi ColorColumn ctermbg=lightgrey guibg=lightgrey
-	"set statusline+=[%{winnr()}]
-	"set statusline+=[%{winwidth(0)}]
 " }
