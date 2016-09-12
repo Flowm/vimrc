@@ -1,5 +1,5 @@
 " README {
-" vim: set foldmarker={,} foldlevel=0 spell:
+" vim: set foldmarker={,} foldlevel=0:
 "
 "	This is my personal vim configuration. As quite a lot of effort went into
 "	it, I would be glad if this was useful for anybody else than me.
@@ -49,17 +49,27 @@
 
 	Plugin 'gmarik/vundle'
 
-	Plugin 'bling/vim-airline'
+	Plugin 'vim-airline/vim-airline'
+	Plugin 'vim-airline/vim-airline-themes'
 	Plugin 'ciaranm/securemodelines'
+	Plugin 'editorconfig/editorconfig-vim'
 	Plugin 'altercation/vim-colors-solarized'
+	Plugin 'scrooloose/nerdcommenter'
 	Plugin 'scrooloose/nerdtree'
 	Plugin 'jistr/vim-nerdtree-tabs'
 	Plugin 'benmills/vimux'
 	Plugin 'airblade/vim-gitgutter'
 	Plugin 'Lokaltog/vim-easymotion'
+	Plugin 'vim-scripts/ReplaceWithRegister'
 	Plugin 'scrooloose/syntastic'
-	Plugin 'sudar/vim-arduino-syntax'
+	Plugin 'ctrlpvim/ctrlp.vim'
+	Plugin 'berdandy/ansiesc.vim'
 	Plugin 'loremipsum'
+	if hostname() == "flake" || hostname() == "snow"
+		Plugin 'Valloric/YouCompleteMe'
+		Plugin 'sudar/vim-arduino-syntax'
+		Plugin 'kballard/vim-swift'
+	endif
 
 	if iCanHazVundle == 0
 		echo "Installing Bundles, please ignore key map error messages"
@@ -107,6 +117,10 @@
 			" Disable autoselection of vim clipboard
 		set clipboard-=autoselect
 		set guioptions-=a
+			" Use the best available cryptmethod
+		if has("patch-7.4.399")
+			set cryptmethod=blowfish2
+		endif
 	" }
 " }
 
@@ -174,7 +188,7 @@
 	" Indention {
 			"One Tab per indentation level. 4 column wide Tabs.
 			"Intelligently detect current indention level
-		set smartindent
+		set autoindent
 			"Size of real Tabs
 		set tabstop=4
 			"Indent amount when using TAB
@@ -397,12 +411,17 @@
 	" }
 	" NERDtree {
 		nmap <leader>n <Plug>NERDTreeTabsToggle<CR>
+		let g:NERDTreeQuitOnOpen = 0
+		let g:nerdtree_tabs_open_on_gui_startup = 0
 	" }
 	" syntastic {
 		let g:syntastic_cpp_compiler_options = '-std=c++11'
 		let g:syntastic_arduino_checkers=['']
 		let g:syntastic_quiet_messages = {
 			\ "!level": "errors" }
+	" }
+	" YouCompleteMe {
+		"let g:loaded_youcompleteme = 1
 	" }
 " }
 
@@ -417,14 +436,16 @@
 		" }
 		" Filetype settings {
 			au FileType ruby	set tabstop=2 softtabstop=2 shiftwidth=2 expandtab smarttab
+			au FileType python	set tabstop=4 softtabstop=4 shiftwidth=4 expandtab textwidth=79
 			au FileType perl	set tabstop=8 softtabstop=4 shiftwidth=4 noexpandtab smarttab shiftround
-			au FileType arduino	set tabstop=2 softtabstop=2 shiftwidth=2 expandtab smarttab autoindent
-			au FileType html	set tabstop=4 shiftwidth=4 nosmarttab autoindent
-			au FileType cpp		set tabstop=4 shiftwidth=4 noexpandtab smarttab autoindent
+			au FileType arduino	set tabstop=2 softtabstop=2 shiftwidth=2 expandtab smarttab
+			au FileType html	set tabstop=4 shiftwidth=4 nosmarttab
+			au FileType cpp		set tabstop=4 shiftwidth=4 noexpandtab smarttab
 		" }
 		" Other dev {
 			au BufRead,BufNewFile *.README set textwidth=72
 			au BufRead,BufNewFile *aegis-* set textwidth=72
+			au BufRead,BufNewFile *_eternal_history set tabstop=8
 		" }
 		augroup END
 	endif
